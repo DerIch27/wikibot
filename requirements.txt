@@ -11,3 +11,5 @@ flask
 pytz
 types-pytz
 python-dotenv
+pandas
+pandas-stubs
