@@ -1,4 +1,5 @@
 import deletionInfo
+import unreviewed
 import pywikibot
 import telegram
 import logging
@@ -12,6 +13,7 @@ if __name__ == '__main__':
         site = pywikibot.Site('de', 'wikipedia')
         katdisk.handleKatDiscussionToday(site)
         deletionInfo.sendDeletionNotifications(site)
+        unreviewed.run(site)
         
         logging.info(f'finished hourly routine')
     
