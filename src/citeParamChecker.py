@@ -1,12 +1,10 @@
 from typing import Literal, Any
-from datetime import datetime
 import wikitextparser as wtp
 import pywikibot
 import telegram
 import logging
 import optOut
 import utils
-import pytz
 import time
 import re
 
@@ -75,11 +73,6 @@ def parseWeirdDateFormats(date: str|None):
         raise e
 
 
-def getTodayString():
-    ''' Gibt Datum in der Form YYYY-MM-DD deutscher Zeit zurück '''
-    return datetime.now(tz=pytz.timezone('Europe/Berlin')).strftime('%Y-%m-%d')
-
-
 def getNextMonth(datestring: str):
     ''' Verschiebt Datum der Form YYYY-MM-DD um einen Monat. '''
     year = int(datestring[:4])
@@ -112,12 +105,12 @@ def getNextDay(datestring: str):
     return formatTimestamp(year, month, day)
 
 
-def datesOk(template: wtp.Template) -> tuple[Literal[True]|str, str|None]:
+def templateOk(template: wtp.Template) -> tuple[Literal[True]|str, str|None]:
     ''' Prüft, ob Daten der Vorlagen Internetquelle, Literatur und Cite web ungültig sind oder in der Zukunft liegen '''
     templateName = template.name.strip()
     if templateName not in ['Internetquelle', 'Literatur', 'Cite web']:
         return True, None
-    todayString = getTodayString()
+    todayString = utils.getTodayString()
     abruf   = parseWeirdDateFormats(utils.findTemplateArg(template, {'Internetquelle': 'abruf',   'Literatur': 'Abruf',   'Cite web': 'access-date'}[templateName]))
     zugriff = parseWeirdDateFormats(utils.findTemplateArg(template, {'Internetquelle': 'zugriff', 'Literatur': 'Zugriff', 'Cite web': 'accessdate'}[templateName]))
     datum   = parseWeirdDateFormats(utils.findTemplateArg(template, {'Internetquelle': 'datum',   'Literatur': 'Datum',   'Cite web': 'date'}[templateName]))
@@ -212,7 +205,7 @@ def checkPageContent(titel: str, content: str, todayString: str):
             elif date > getNextDay(todayString):
                 yield Problem(titel, 'Abrufdatum liegt in der Zukunft.', str(ref), todayString, date)
     for template in wiki.templates:
-        result, asset = datesOk(template)
+        result, asset = templateOk(template)
         if True != result: 
             yield Problem(titel, result, str(template), todayString, asset)
         result = archiveParamsOk(template)
@@ -224,7 +217,7 @@ def checkPage(site: Any, pagetitle: str, allProblems: list[Problem]):
     try:
         page = pywikibot.Page(site, pagetitle)
         content = page.get()
-        for problem in checkPageContent(page.title(), content, getTodayString()):
+        for problem in checkPageContent(page.title(), content, utils.getTodayString()):
             if problem in allProblems: continue
             for rev in page.revisions(total=50):
                 try:
@@ -290,7 +283,7 @@ def updateWikilist():
     allProblems = loadAllProblems()
     datum = None
     titel = None
-    wikitext = '{{/Info|' + str(len(allProblems)) + '|' + getTodayString() + '}}\n\n'
+    wikitext = '{{/Info|' + str(len(allProblems)) + '|' + utils.getTodayString() + '}}\n\n'
     for problem in allProblems:
         if datum != problem.foundDate:
             wikitext += f'== {utils.formatDateFromDatestring(problem.foundDate)} ==\n\n'
@@ -362,7 +355,7 @@ def sendPlannedNotifications(site):
                 if outgoingNotifications.get(problem.user) == None: outgoingNotifications[problem.user] = set()
                 datumstyp = 'Veröffentlichungsdatum' if problem.problemtyp.startswith('Parameter datum') else 'Abrufdatum'
                 outgoingNotifications[problem.user].add(f'Du hast mit [[Spezial:Diff/{problem.revision}|dieser Änderung]] auf [[{pagetitle}]] den {utils.formatDateFromDatestring(problem.assets)} als {datumstyp} angegeben. Da dieses Datum in der Zukunft liegt, möchte ich dich bitten, deine Änderung nochmal auf Tippfehler zu überprüfen.')
-                sentNotifications[problem.user][pagetitle] = getTodayString()
+                sentNotifications[problem.user][pagetitle] = utils.getTodayString()
         except Exception as e:
             e.add_note(f'failed while compiling notification on page "{pagetitle}"')
             raise e

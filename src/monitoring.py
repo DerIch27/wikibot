@@ -16,7 +16,7 @@ def formatStats(stats: tuple[float,float,float]):
     return f'CPU: {stats[0]}%\nRAM: {stats[1]}%\nDISK: {stats[2]}%'
 
 def badStats(stats: tuple[float,float,float]):
-    return stats[0] > 80 or stats[1] > 80 or stats[2] > 80
+    return stats[0] > 80 or stats[1] > 90 or stats[2] > 80
 
 def saveStats(stats: tuple[float,float,float]):
     utils.ensureDir('./logs/monitoring.csv')

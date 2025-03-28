@@ -52,7 +52,6 @@ def editWiki(data: dict[str, tuple[list[dict[str, str]], list[dict[str, str]]]],
         assert site.logged_in()
         if optOut.isAllowed(page):
             page.save(botflag=True, minor=False, summary=(summary if forcedSummary==None else f'Bot: {forcedSummary}'))
-        site.logout()
     else:
         print('Page content did not change.')
 

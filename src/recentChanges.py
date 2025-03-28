@@ -48,7 +48,7 @@ def monitorRecentChanges():
                 stream = getStream()
                 lastLagNotification = utils.checkLastUpdate('recent-lagged-stream', 30)
                 if not lastLagNotification[0]:
-                    telegram.send(f'reset stream after lag of {formatSeconds(lag)} ({telegram.difflink(change)}); Last lag {lastLagNotification[1]//60}min ago', silent=True)
+                    telegram.send(f'reset stream after lag of {formatSeconds(lag)} ({telegram.difflink(change)}); Last lag {int(lastLagNotification[1]//60)}min ago', silent=True)
             telegram.alarmOnChange(change)
             if '�' in change['title']: # Invalid title
                 logging.warning(f'replacement char found in title "{change.get('title')}" on change {change.get('revision')}')
