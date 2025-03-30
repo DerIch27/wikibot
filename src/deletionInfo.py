@@ -160,7 +160,7 @@ def checkForExistingInfoOnDisk(disk: pywikibot.Page, pagetitles: set[str]):
                 if 'lösch' in sec.contents.lower(): return True
         return False
     except pywikibot.exceptions.InvalidTitleError:
-        logging.warn(f'got invalid title while checking for existing info on disk')
+        logging.warning(f'got invalid title while checking for existing info on disk')
         return False
 
 interwikiRegex = re.compile('^[a-z][a-z]>')  

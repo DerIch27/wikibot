@@ -44,7 +44,7 @@ def monitorRecentChanges():
             logging.debug(f'handle recent change {change.get('revision')} on {change.get('title')}')
             lag = int(time.time() - change['timestamp'])
             if lag > 600: # 10min
-                logging.warn(f'received revision {change['revision']['new']} with lag {lag} and reset stream')
+                logging.warning(f'received revision {change['revision']['new']} with lag {lag} and reset stream')
                 stream = getStream()
                 lastLagNotification = utils.checkLastUpdate('recent-lagged-stream', 30)
                 if not lastLagNotification[0]:
