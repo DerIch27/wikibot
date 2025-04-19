@@ -114,7 +114,7 @@ def formatTime(centiseconds: int, showCenti: bool):
 def formatValue(data: dict):
     # see https://github.com/thewca/worldcubeassociation.org/blob/main/app/webpacker/lib/wca-live/attempts.js
     value = data['value']
-    event = data['eventName']
+    event = data['event_name']
     if 'Multi-Blind' in event:
         missed = value % 100
         points = 99 - value // 10000000
@@ -138,7 +138,7 @@ def scrape():
     assert rows is not None
     data: dict[str, tuple[list[dict[str, str]], list[dict[str, str]]]] = dict()
     for row in rows:
-        event = row.get('eventName')
+        event = row.get('event_name')
         assert event is not None
         if data.get(event) is None: data[event] = ([], [])
         type = row.get('type')
@@ -149,8 +149,8 @@ def scrape():
         data[event][index].append({'date': formatDateForJson(row),
                                    'single': formatedTime if type == 'single' else '',
                                    'average': formatedTime if type == 'average' else '',
-                                   'name': row['personName'],
-                                   'competition': getFullCompetitionName(row['competitionId'])})
+                                   'name': row['person_name'],
+                                   'competition': getFullCompetitionName(row['competition_id'])})
     return data
     
 def run():
