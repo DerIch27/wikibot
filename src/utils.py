@@ -116,7 +116,7 @@ def addToCsv(rawPath: str, row: list, header: list|None=None):
     if not os.path.isfile(path):
         io.open(path, 'w', encoding='utf8').close()
         if header is not None:
-            addToCsv(path, rawPath)
+            addToCsv(rawPath, header)
     with io.open(path, 'a', encoding='utf8') as file:
         csv.writer(file).writerow(row)
 
