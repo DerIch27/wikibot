@@ -110,13 +110,13 @@ def dumpJson(path: str, content):
     with io.open(path, 'w', encoding='utf8') as file:
         json.dump(content, file, indent=2, ensure_ascii=False)
 
-def addToCsv(path: str, row: list, header: list|None=None):
-    path = getDataPath(path)
+def addToCsv(rawPath: str, row: list, header: list|None=None):
+    path = getDataPath(rawPath)
     ensureDir(path)
     if not os.path.isfile(path):
         io.open(path, 'w', encoding='utf8').close()
         if header is not None:
-            addToCsv(path, header)
+            addToCsv(path, rawPath)
     with io.open(path, 'a', encoding='utf8') as file:
         csv.writer(file).writerow(row)
 
