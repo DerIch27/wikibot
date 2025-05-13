@@ -1,4 +1,5 @@
 from pywikibot.comms import eventstreams
+import birthDatesChecker
 import citeParamChecker
 import deletionInfo
 import pywikibot
@@ -60,7 +61,9 @@ def monitorRecentChanges():
                 if re.match('^Wikipedia:WikiProjekt Kategorien/Diskussionen/[0-9]{4}/(Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)/[0-9][0-9]?$', change['title']):
                     katdisk.handleKatDiscussionUpdate(site, change['title'])
             elif change['namespace'] == 0: # Artikelnamensraum
-                citeParamChecker.checkPagefromRecentChanges(site, change['title'])
+                page = pywikibot.Page(site, change['title'])
+                birthDatesChecker.checkPage(page)
+                citeParamChecker.checkPagefromRecentChanges(page, change['title'])
         except requests.exceptions.HTTPError as e:
             telegram.handleServerError(e)
             monitorRecentChanges()

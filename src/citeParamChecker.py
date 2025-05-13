@@ -213,9 +213,8 @@ def checkPageContent(titel: str, content: str, todayString: str):
             yield Problem(titel, result, str(template), todayString)
 
 
-def checkPage(site: Any, pagetitle: str, allProblems: list[Problem]):
+def checkPage(page: pywikibot.Page, pagetitle: str, allProblems: list[Problem]):
     try:
-        page = pywikibot.Page(site, pagetitle)
         content = page.get()
         for problem in checkPageContent(page.title(), content, utils.getTodayString()):
             if problem in allProblems: continue
@@ -244,7 +243,7 @@ def checkPage(site: Any, pagetitle: str, allProblems: list[Problem]):
         return
     except pywikibot.exceptions.ServerError as e:
         telegram.handleServerError(e)
-        return checkPage(site, pagetitle, allProblems)
+        return checkPage(page, pagetitle, allProblems)
     except Exception as e:
         e.add_note(f'failed while checking page {pagetitle}')
         raise e
@@ -275,7 +274,7 @@ def checkPagesInProblemList(site):
             logging.debug(f'Problem in {problem.titel} abgearbeitet.')
             del allProblems[index]
     for page in allPages:
-        allProblems += checkPage(site, page, allProblems)
+        allProblems += checkPage(pywikibot.Page(site, page), page, allProblems)
     dumpAllProblems(allProblems)
 
 
@@ -305,12 +304,12 @@ def updateWikilist():
 
 numberOfChanges = 0
 numberOfNewProblems = 0
-def checkPagefromRecentChanges(site: Any, pagetitle: str):
+def checkPagefromRecentChanges(page: pywikibot.Page, pagetitle: str):
     global numberOfNewProblems
     global numberOfChanges
     numberOfChanges += 1
     allProblems = loadAllProblems()
-    newProblems = checkPage(site, pagetitle, allProblems)
+    newProblems = checkPage(page, pagetitle, allProblems)
     for problem in newProblems:
         numberOfNewProblems += 1
         if re.match(NOTIFICATION_PROBLEM_TYPES, problem.problemtyp) and problem.freshVersion:
@@ -344,7 +343,7 @@ def sendPlannedNotifications(site):
                 logging.info(f'skip problem notification on "{pagetitle}" because latest revision is too new')
                 skippedNotifications.add(pagetitle)
                 continue
-            for problem in checkPage(site, pagetitle, []):
+            for problem in checkPage(pywikibot.Page(site, pagetitle), pagetitle, []):
                 if not re.match(NOTIFICATION_PROBLEM_TYPES, problem.problemtyp): continue
                 if not problem.freshVersion: continue
                 if sentNotifications.get(problem.user) == None: sentNotifications[problem.user] = {}
