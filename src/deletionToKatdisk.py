@@ -34,7 +34,11 @@ def extractFromDeletionDisk(content: str) -> tuple[str,str]: # (Kategorien, Rest
         result += '\n'.join(split)
     if not ok:
         raise Exception(f'Keine Überschrift Benutzerdiskussionsseiten auf Löschkandidatenseite gefunden.')
-    return result.strip().strip().replace('\n<span></span>\n','\n').replace('\n\n\n', '\n\n'), parsed.string.strip().replace('\n\n\n', '\n\n')
+    newContentsString = result.strip().strip()\
+        .replace('\n<span></span>\n','\n')\
+        .replace('\n\n\n', '\n\n')\
+        .replace(r"""<span class="wp_boppel noviewer" aria-hidden="true" role="presentation">[[Datei:Symbol support vote.svg|15px|link=]]&nbsp;</span>'''Pro'''""", "{{Pro}}")
+    return newContentsString, parsed.string.strip().replace('\n\n\n', '\n\n')
 
 
 def moveKatDiskFromDeletionDisk(site: Any, deletionDiskPage: pywikibot.Page, date: str, change: dict|None, force: bool=False):
@@ -84,5 +88,7 @@ if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s - %(levelname)s - DEBUGGING - %(message)s', level=logging.DEBUG)
     site = pywikibot.Site('de', 'wikipedia')
     site.login()
-    deletionDisk = pywikibot.Page(site, 'Wikipedia:Löschkandidaten/13. Juni 2024')
-    moveKatDiskFromDeletionDisk(site, deletionDisk, '2024-06-13', None, force=True)
+    deletionDisk = pywikibot.Page(site, 'Wikipedia:Löschkandidaten/1. August 2025')
+    content = deletionDisk.getOldVersion(258488238)
+    print(extractFromDeletionDisk(content)[0])
+    #moveKatDiskFromDeletionDisk(site, deletionDisk, '2024-06-13', None, force=True)
