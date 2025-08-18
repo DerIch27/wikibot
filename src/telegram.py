@@ -21,12 +21,18 @@ elif TARGET_USER is None or ACCESS_TOKEN is None:
 
 def send(message: str, silent: bool=False):
     if DISABLED: logging.info('telegram is disabled. skip notification:\n' + message); return
-    maxLogLength = 50
+    maxLogLength = 75
     logmessage = message.replace('\n', ' ↵ ')
+    message = message.replace('_', '\_')
     logging.info(f'Send telegram message: {logmessage[:maxLogLength]}{'...' if len(logmessage)>maxLogLength else ''}')
     url = f'https://api.telegram.org/bot{ACCESS_TOKEN}/sendMessage'
     result = requests.post(url, {'chat_id': TARGET_USER, 'text': message, 'disable_notification': silent, 'parse_mode': 'Markdown'})
-    if not result.ok: logging.error(f'sending telegram message failed with status {result.status_code}')
+    if not result.ok: 
+        logging.error(f'sending telegram message of length {len(message)} failed with status {result.status_code}')
+        try:
+            logging.error(f'telegram response: {result.json()}')
+        except:
+            pass
     return result.ok
 
 
