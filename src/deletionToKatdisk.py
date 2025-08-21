@@ -5,6 +5,7 @@ import pywikibot
 import telegram
 import logging
 import utils
+import json
 import re
 import io
 
@@ -42,7 +43,6 @@ def extractFromDeletionDisk(content: str) -> tuple[str,str]: # (Kategorien, Rest
 
 
 def moveKatDiskFromDeletionDisk(site: Any, deletionDiskPage: pywikibot.Page, date: str, change: dict|None, force: bool=False):
-    engage = force or (change is not None and re.match('/\\* Kategorie:(.)* \\*/', change['comment']))
     wrongKats, rest = extractFromDeletionDisk(deletionDiskPage.text)
     if wrongKats != '': 
         moveHistory: dict[str, dict] = utils.loadJson('moveHistory.json', {})
@@ -59,8 +59,6 @@ def moveKatDiskFromDeletionDisk(site: Any, deletionDiskPage: pywikibot.Page, dat
                                                  'timestring': datetime.fromtimestamp(change['timestamp']).strftime('%d.%m.%Y %H:%M'), 
                                                  'diff': change['revision']['new']}
             utils.dumpJson('moveHistory.json', moveHistory)
-        if not engage:
-            telegram.send(f'Falscher Eintrag in {deletionDiskPage.title()}{'' if change is None else f' ({telegram.difflink(change)})'}')
         logging.info('Verschiebe Eintrag von Löschdiskussionsseite nach WikiProjekt Kategorien')
         logging.info(change)
         userLink = '???' if change is None else f'[[Benutzer:{change['user']}]]'
@@ -77,12 +75,24 @@ def moveKatDiskFromDeletionDisk(site: Any, deletionDiskPage: pywikibot.Page, dat
         katDiskPage.text = '\n'.join(katDiskSplit[:len(katDiskSplit)-i+1] + ['\n'.join(wrongKatsSplit[:len(wrongKatsSplit)-i+1]) + ' <small>(verschoben vom [[Benutzer:DerIchBot|DerIchBot]])</small>'] + katDiskSplit[len(katDiskSplit)-i+1:])
         with io.open('logs/deletionToKatDisk.wiki', 'w', encoding='utf8') as file:
             file.write(katDiskPage.text)
-        if engage:
+        if force or (change is not None and checkCommentForAnswer(change['comment'], katDiskPage.text)):
             if utils.savePage(deletionDiskPage, f'Verschiebe Beitrag von {userLink} nach [[{katDiskLink}]]', botflag=True):
                 if not utils.savePage(katDiskPage, f'Verschiebe Beitrag {f'[[Spezial:Diff/{change['revision']['new']}]] ' if change is not None else ''}von {userLink} aus [[{deletionDiskPage.title()}]]', botflag=True):
                     raise Exception('Incomplete move of discussion from deletion disk to kat-disk')
             return True
+        else:
+            telegram.send(f'Falscher Eintrag in {deletionDiskPage.title()}{'' if change is None else f' ({telegram.difflink(change)})'}')
     return False
+
+def checkCommentForAnswer(comment: str, katDiskContent: str):
+    parsedComment = re.match('/\\*( (.)* )\\*/', comment)
+    if parsedComment is None: return False
+    sectionTitles: list[str] = []
+    for sec in wtp.parse(katDiskContent).get_sections():
+        if sec.title is None: continue
+        sectionTitles.append(wtp.parse(sec.title).plain_text())
+    logging.info(f'check deletion disk comment "{comment}" against {json.dumps(sectionTitles)}')
+    return parsedComment[1] in sectionTitles
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s - %(levelname)s - DEBUGGING - %(message)s', level=logging.DEBUG)
