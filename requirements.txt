@@ -1,5 +1,5 @@
 sseclient==0.0.22
-pywikibot
+pywikibot==10.3.2
 wikitextparser
 beautifulsoup4
 mypy

@@ -73,13 +73,6 @@ def monitorRecentChanges():
         except pywikibot.exceptions.ServerError as e:
             telegram.handleServerError(e)
             monitorRecentChanges()
-        except TypeError as e:
-            if str(e) == "Session.request() got an unexpected keyword argument 'last_event_id'":
-                telegram.handleServerError(e)
-                monitorRecentChanges()
-            else:
-                e.add_note(f'failed while handling recent change {change.get('revision')} on {change.get('title')}')
-                raise e
         except Exception as e:
             e.add_note(f'failed while handling recent change {change.get('revision')} on {change.get('title')}')
             raise e
