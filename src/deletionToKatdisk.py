@@ -1,6 +1,7 @@
 from datetime import datetime
 import wikitextparser as wtp
 from typing import Any
+import citeParamChecker
 import pywikibot
 import telegram
 import logging
@@ -19,19 +20,19 @@ def extractFromDeletionDisk(content: str) -> tuple[str,str]: # (Kategorien, Rest
             result += '\n' + sec.level*'=' + ' ' + sec.title + ' ' + sec.level*'=' + '\n\n'
             del sec.title
         split = sec.contents.strip().split('\n')
-        newContents = []
+        newDeletionDiskContents = []
         if len(split)>0 and re.match('^{{Löschkandidatenseite|erl=.*}}$', split[0]):
-            newContents.append(split[0])
+            newDeletionDiskContents.append(split[0])
             split.pop(0)
         while len(split)>0 and split[0].strip() == '':
             split.pop(0)
-        if len(split)>0 and re.match('^<!-- Hinweis an den letzten Bearbeiter: Wenn alles erledigt ist, hinter "erl=" mit --~~~~ signieren. -->', split[0]):
-            newContents.append(split[0])
-            split.pop(0)
-        if len(newContents) == 0:
+        if '<!-- Hinweis an den letzten Bearbeiter: Wenn alles erledigt ist, hinter "erl=" mit --~~~~ signieren. -->' in split:
+            newDeletionDiskContents.append('<!-- Hinweis an den letzten Bearbeiter: Wenn alles erledigt ist, hinter "erl=" mit --~~~~ signieren. -->')
+            split.remove('<!-- Hinweis an den letzten Bearbeiter: Wenn alles erledigt ist, hinter "erl=" mit --~~~~ signieren. -->')
+        if len(newDeletionDiskContents) == 0:
             sec.contents = ''
         else:
-            sec.contents = '\n'.join(newContents) + '\n\n'
+            sec.contents = '\n'.join(newDeletionDiskContents) + '\n\n'
         result += '\n'.join(split)
     if not ok:
         raise Exception(f'Keine Überschrift Benutzerdiskussionsseiten auf Löschkandidatenseite gefunden.')
@@ -42,7 +43,8 @@ def extractFromDeletionDisk(content: str) -> tuple[str,str]: # (Kategorien, Rest
     return newContentsString, parsed.string.strip().replace('\n\n\n', '\n\n')
 
 
-def moveKatDiskFromDeletionDisk(site: Any, deletionDiskPage: pywikibot.Page, date: str, change: dict|None, force: bool=False):
+def moveKatDiskFromDeletionDisk(site: Any, deletionDiskPage: pywikibot.Page, change: dict|None, force: bool=False):
+    date = citeParamChecker.parseWeirdDateFormats(deletionDiskPage.title()[26:])
     wrongKats, rest = extractFromDeletionDisk(deletionDiskPage.text)
     if wrongKats != '': 
         moveHistory: dict[str, dict] = utils.loadJson('moveHistory.json', {})
@@ -80,6 +82,7 @@ def moveKatDiskFromDeletionDisk(site: Any, deletionDiskPage: pywikibot.Page, dat
                 if not utils.savePage(katDiskPage, f'Verschiebe Beitrag {f'[[Spezial:Diff/{change['revision']['new']}]] ' if change is not None else ''}von {userLink} aus [[{deletionDiskPage.title()}]]', botflag=True):
                     raise Exception('Incomplete move of discussion from deletion disk to kat-disk')
             return True
+            telegram.send(f'Verschiebe Eintrag in {deletionDiskPage.title()}{'' if change is None else f' ({telegram.difflink(change)})'}')
         else:
             telegram.send(f'Falscher Eintrag in {deletionDiskPage.title()}{'' if change is None else f' ({telegram.difflink(change)})'}')
     return False
@@ -90,15 +93,12 @@ def checkCommentForAnswer(comment: str, katDiskContent: str):
     sectionTitles: list[str] = []
     for sec in wtp.parse(katDiskContent).get_sections():
         if sec.title is None: continue
-        sectionTitles.append(wtp.parse(sec.title).plain_text())
+        sectionTitles.append(wtp.parse(sec.title).plain_text().replace(':Kategorie', 'Kategorie'))
     logging.info(f'check deletion disk comment "{comment}" against {json.dumps(sectionTitles)}')
     return parsedComment[1] in sectionTitles
 
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s - %(levelname)s - DEBUGGING - %(message)s', level=logging.DEBUG)
     site = pywikibot.Site('de', 'wikipedia')
-    site.login()
-    deletionDisk = pywikibot.Page(site, 'Wikipedia:Löschkandidaten/1. August 2025')
-    content = deletionDisk.getOldVersion(258488238)
-    print(extractFromDeletionDisk(content)[0])
-    #moveKatDiskFromDeletionDisk(site, deletionDisk, '2024-06-13', None, force=True)
+    deletionDisk = pywikibot.Page(site, 'Wikipedia:Löschkandidaten/24. August 2025')
+    moveKatDiskFromDeletionDisk(site, deletionDisk, None, force=False)
