@@ -16,7 +16,7 @@ def handleDeletionDiscussionUpdate(site: pywikibot._BaseSite, titel: str, change
     date = citeParamChecker.parseWeirdDateFormats(titel[26:])
     if date is None or date is False or date < '2024-04-06': return
     deletionDiskPage = pywikibot.Page(site, titel) 
-    if deletionToKatdisk.moveKatDiskFromDeletionDisk(site, deletionDiskPage, date, change):
+    if deletionToKatdisk.moveKatDiskFromDeletionDisk(site, deletionDiskPage, change):
         return handleDeletionDiscussionUpdate(site, titel, change)
     logs: dict[str, dict[str,dict]] = utils.loadJson(f'deletionInfo/{date}.json', {})
     if not utils.getBoolEnv('DELETION_NOTIFICATION_ENABLED', True):
