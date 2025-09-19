@@ -218,8 +218,10 @@ def checkPage(page: pywikibot.Page, pagetitle: str, allProblems: list[Problem]):
         content = page.get()
         for problem in checkPageContent(page.title(), content, utils.getTodayString()):
             if problem in allProblems: continue
+            preRevisionsToCheck: int | None = None
             for rev in page.revisions(total=50):
                 try:
+                    if preRevisionsToCheck is not None and preRevisionsToCheck <= 0: break
                     if rev['parentid'] == 0: problem.revision = rev['revid']; break
                     if 'mw-manual-revert' in rev['tags'] or 'mw-rollback' in rev['tags']: continue
                     timestamp: pywikibot.Timestamp = rev['timestamp']
@@ -227,11 +229,20 @@ def checkPage(page: pywikibot.Page, pagetitle: str, allProblems: list[Problem]):
                     oldContent = page.getOldVersion(rev['parentid'])
                     if oldContent == None: break # Version verborgen
                     oldProblems = list(checkPageContent(page.title(), oldContent, revTimestamp))
-                    if problem not in oldProblems:
-                        problem.freshVersion = (oldProblems == [])
-                        problem.revision = rev['revid']
-                        problem.user = rev['user']
-                        break
+                    if preRevisionsToCheck is None:
+                        if problem not in oldProblems:
+                            problem.freshVersion = (oldProblems == [])
+                            problem.revision = rev['revid']
+                            problem.user = rev['user']
+                            if problem.freshVersion: 
+                                preRevisionsToCheck = 10
+                            else:
+                                break
+                    else:
+                        preRevisionsToCheck -= 1
+                        if problem in oldProblems:
+                            problem.freshVersion = False
+                            break
                 except Exception as e:
                     e.add_note(f'failed while checking if problem already existed before revision {rev.get('revid')}')
                     raise e
