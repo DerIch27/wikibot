@@ -222,7 +222,12 @@ def checkPage(page: pywikibot.Page, pagetitle: str, allProblems: list[Problem]):
             for rev in page.revisions(total=50):
                 try:
                     if preRevisionsToCheck is not None and preRevisionsToCheck <= 0: break
-                    if rev['parentid'] == 0: problem.revision = rev['revid']; break
+                    if rev['parentid'] == 0: 
+                        if preRevisionsToCheck is None:
+                            problem.revision = rev['revid']
+                            problem.user = rev['user']
+                            problem.freshVersion = True
+                        break
                     if 'mw-manual-revert' in rev['tags'] or 'mw-rollback' in rev['tags']: continue
                     timestamp: pywikibot.Timestamp = rev['timestamp']
                     revTimestamp = str(timestamp.year).rjust(4,'0') + '-' + str(timestamp.month).rjust(2,'0') + '-' + str(timestamp.day).rjust(2,'0')
