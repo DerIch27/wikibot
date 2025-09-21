@@ -213,14 +213,19 @@ def checkPageContent(titel: str, content: str, todayString: str):
             yield Problem(titel, result, str(template), todayString)
 
 
-def checkPage(page: pywikibot.Page, pagetitle: str, allProblems: list[Problem]):
+def checkPage(page: pywikibot.Page, pagetitle: str, allProblems: list[Problem], startAtRevId: int | None = None):
     try:
-        content = page.get()
+        content = page.get() if startAtRevId is None else page.getOldVersion(startAtRevId)
         for problem in checkPageContent(page.title(), content, utils.getTodayString()):
             if problem in allProblems: continue
             preRevisionsToCheck: int | None = None
             for rev in page.revisions(total=50):
                 try:
+                    if startAtRevId is not None:
+                        if rev['revid'] == startAtRevId:
+                            startAtRevId = None
+                        else:
+                            continue
                     if preRevisionsToCheck is not None and preRevisionsToCheck <= 0: break
                     if rev['parentid'] == 0: 
                         if preRevisionsToCheck is None:
@@ -386,6 +391,13 @@ def sendPlannedNotifications(site):
             logging.info(f'do not notify {user} because saving failed')
     utils.dumpJson('futureWarningsPlanned.json', list(skippedNotifications))
     utils.dumpJson('futureWarningsSent.json', sentNotifications)
+
+
+def checkPageDebug(pagetitle: str, startAtRevId: int | None = None):
+    site = pywikibot.Site('de', 'wikipedia')
+    page = pywikibot.Page(site, pagetitle)
+    for problem in checkPage(page, pagetitle, [], startAtRevId):
+        print(problem.toDict())
 
 
 if __name__ == '__main__':
