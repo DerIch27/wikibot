@@ -197,9 +197,9 @@ def dumpAllProblems(allProblems: list[Problem]):
 def checkPageContent(titel: str, content: str, todayString: str):
     wiki = wtp.parse(content)
     for ref in wiki.get_tags('ref'):
-        potentialDate = re.search('abgerufen (am|im) (([0-9][0-9]?\\.[0-9][0-9]?\\.[0-9]{3}[0-9]?[0-9]?)|(([0-9][0-9]?\\. )?' + monthRegex + ' [0-9]{3}[0-9]?[0-9]?))', ref.contents.lower())
+        potentialDate = re.search('(eingesehen|abgerufen) (am|im) (([0-9][0-9]?\\.[0-9][0-9]?\\.[0-9]{3}[0-9]?[0-9]?)|(([0-9][0-9]?\\. )?' + monthRegex + ' [0-9]{3}[0-9]?[0-9]?))', ref.contents.lower())
         if potentialDate:
-            date = parseWeirdDateFormats(potentialDate.group(2))
+            date = parseWeirdDateFormats(potentialDate.group(3))
             if date is False:
                 yield Problem(titel, 'Abrufdatum ungültig.', str(ref), todayString, date)
             elif date > getNextDay(todayString):
