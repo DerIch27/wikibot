@@ -184,14 +184,22 @@ class Problem(dict):
         return {'titel': self.titel, 'problemtyp': self.problemtyp, 'snippet': self.snippet, 'foundDate': self.foundDate, 'revision': self.revision, 'freshVersion': self.freshVersion, 'assets': self.assets, 'user': self.user}
 
 
-def loadAllProblems() -> list[Problem]:
-    content: list[dict] = utils.loadJson('problems.json', [])
+def loadAllProblems(filename: str = 'problems.json') -> list[Problem]:
+    content: list[dict] = utils.loadJson(filename, [])
     return  [Problem(dictionary=problem) for problem in content]
 
 
-def dumpAllProblems(allProblems: list[Problem]):
+def dumpAllProblems(allProblems: list[Problem], filename: str = 'problems.json'):
     content = [problem.toDict() for problem in allProblems]
-    utils.dumpJson('problems.json', content)
+    utils.dumpJson(filename, content)
+
+
+def addProblemToDebugLog(problem: Problem):
+    filename = 'problemLogs/' + problem.problemtyp.lower().strip('. ').replace(' ', '_').replace('/', '_').replace('ü', 'ue') + '.json'
+    allProblems = loadAllProblems(filename)
+    if problem not in allProblems:
+        allProblems.append(problem)
+    dumpAllProblems(allProblems)
 
 
 def checkPageContent(titel: str, content: str, todayString: str):
@@ -339,6 +347,7 @@ def checkPagefromRecentChanges(page: pywikibot.Page, pagetitle: str):
             utils.dumpJson('futureWarningsPlanned.json', futureWarnings)
         if len(allProblems) < 300 and problem not in allProblems:
             allProblems.append(problem)
+        addProblemToDebugLog(problem)
     dumpAllProblems(allProblems)
     if numberOfChanges >= 200:
         logging.info(f'Checked 200 changes and found {numberOfNewProblems} new problems.')
