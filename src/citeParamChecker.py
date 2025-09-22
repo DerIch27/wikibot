@@ -196,10 +196,11 @@ def dumpAllProblems(allProblems: list[Problem], filename: str = 'problems.json')
 
 def addProblemToDebugLog(problem: Problem):
     filename = 'problemLogs/' + problem.problemtyp.lower().strip('. ').replace(' ', '_').replace('/', '_').replace('ü', 'ue') + '.json'
+    logging.debug(f'Add problem to debug log "{filename}"')
     allProblems = loadAllProblems(filename)
     if problem not in allProblems:
         allProblems.append(problem)
-    dumpAllProblems(allProblems)
+    dumpAllProblems(allProblems, filename)
 
 
 def checkPageContent(titel: str, content: str, todayString: str):
