@@ -111,12 +111,15 @@ def templateOk(template: wtp.Template) -> tuple[Literal[True]|str, str|None]:
     if templateName not in ['Internetquelle', 'Literatur', 'Cite web']:
         return True, None
     todayString = utils.getTodayString()
-    abruf   = parseWeirdDateFormats(utils.findTemplateArg(template, {'Internetquelle': 'abruf',   'Literatur': 'Abruf',   'Cite web': 'access-date'}[templateName]))
-    zugriff = parseWeirdDateFormats(utils.findTemplateArg(template, {'Internetquelle': 'zugriff', 'Literatur': 'Zugriff', 'Cite web': 'accessdate'}[templateName]))
-    datum   = parseWeirdDateFormats(utils.findTemplateArg(template, {'Internetquelle': 'datum',   'Literatur': 'Datum',   'Cite web': 'date'}[templateName]))
-    if abruf == False: return 'Abrufdatum ungültig.', abruf
-    if zugriff == False: return 'Zugriffsdatum ungültig.', zugriff
-    if datum == False: return 'Veröffentlichungsdatum ungültig.', datum
+    abrufRaw   = utils.findTemplateArg(template, {'Internetquelle': 'abruf',   'Literatur': 'Abruf',   'Cite web': 'access-date'}[templateName])
+    zugriffRaw = utils.findTemplateArg(template, {'Internetquelle': 'zugriff', 'Literatur': 'Zugriff', 'Cite web': 'accessdate'}[templateName])
+    datumRaw   = utils.findTemplateArg(template, {'Internetquelle': 'datum',   'Literatur': 'Datum',   'Cite web': 'date'}[templateName])
+    abruf   = parseWeirdDateFormats(abrufRaw)
+    zugriff = parseWeirdDateFormats(zugriffRaw)
+    datum   = parseWeirdDateFormats(datumRaw)
+    if abruf == False: return 'Abrufdatum ungültig.', abrufRaw
+    if zugriff == False: return 'Zugriffsdatum ungültig.', zugriffRaw
+    if datum == False: return 'Veröffentlichungsdatum ungültig.', datumRaw
     if datum != None and datum > getNextYear(todayString): return "Parameter datum liegt in der Zukunft.", datum
     if abruf == None and zugriff == None and templateName == 'Internetquelle': return "Pflichtparameter abruf nicht gesetzt.", abruf
     if abruf == None and zugriff == None and templateName != 'Internetquelle': return True, None
@@ -146,6 +149,7 @@ def archiveParamsOk(template: wtp.Template) -> Literal[True] | str:
     if archivurl[28:36] == archivdatum or archivurl[28:36] == abrufdatum or archivurl[28:36] == datum: return True
     if archivdatum == None: return True # "Kein Archivierungsdatum gesetzt."
     return "Falsches Archivierungsdatum gesetzt."
+
 
 class Problem(dict):
     def __init__(self, titel: str|None=None, problemtyp: str|None=None, snippet: str|None=None, foundDate: str|None=None, assets: Any=None, dictionary: dict = {}):
@@ -208,9 +212,10 @@ def checkPageContent(titel: str, content: str, todayString: str):
     for ref in wiki.get_tags('ref'):
         potentialDate = re.search('(eingesehen|abgerufen) (am|im) (([0-9][0-9]?\\.[0-9][0-9]?\\.[0-9]{3}[0-9]?[0-9]?)|(([0-9][0-9]?\\. )?' + monthRegex + ' [0-9]{3}[0-9]?[0-9]?))', ref.contents.lower())
         if potentialDate:
-            date = parseWeirdDateFormats(potentialDate.group(3))
+            dateRaw = potentialDate.group(3)
+            date = parseWeirdDateFormats(dateRaw)
             if date is False:
-                yield Problem(titel, 'Abrufdatum ungültig.', str(ref), todayString, date)
+                yield Problem(titel, 'Abrufdatum ungültig.', str(ref), todayString, dateRaw)
             elif date > getNextDay(todayString):
                 yield Problem(titel, 'Abrufdatum liegt in der Zukunft.', str(ref), todayString, date)
     for template in wiki.templates:
