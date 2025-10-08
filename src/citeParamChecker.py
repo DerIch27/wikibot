@@ -176,13 +176,20 @@ class Problem(dict):
         self.revision     = revision
         self.user         = user
         self.assets       = assets
+    def normalisedSnippet(self):
+        snippet = self.snippet.replace('http://', 'https://')
+        if snippet.startswith('<ref>') and snippet.endswith('</ref>'): 
+            snippet = '<ref>' + snippet[5:-6].strip() + '</ref>'
+        elif snippet.startswith('{{') and snippet.endswith('}}'): 
+            snippet = '{{' + snippet[2:-2].strip() + '}}'
+        return snippet
     def __str__(self):
         return self.titel + ': ' + self.problemtyp + ' ' + self.snippet
     def __eq__(self, other):
         if type(other) != Problem: return False
         if self.titel != other.titel: return False
         if self.problemtyp != other.problemtyp: return False
-        if self.snippet != other.snippet: return False
+        if self.normalisedSnippet() != other.normalisedSnippet(): return False
         return True
     def toDict(self):
         return {'titel': self.titel, 'problemtyp': self.problemtyp, 'snippet': self.snippet, 'foundDate': self.foundDate, 'revision': self.revision, 'freshVersion': self.freshVersion, 'assets': self.assets, 'user': self.user}
