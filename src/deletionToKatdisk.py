@@ -88,13 +88,13 @@ def moveKatDiskFromDeletionDisk(site: Any, deletionDiskPage: pywikibot.Page, cha
     return False
 
 def checkCommentForAnswer(comment: str, katDiskContent: str):
-    parsedComment = re.match('/\\*( (.)* )\\*/', comment)
+    parsedComment = re.match('/\\* ((.)*) \\*/', comment)
     if parsedComment is None: return False
     sectionTitles: list[str] = []
     for sec in wtp.parse(katDiskContent).get_sections():
         if sec.title is None: continue
-        sectionTitles.append(wtp.parse(sec.title).plain_text().replace(':Kategorie', 'Kategorie'))
-    logging.info(f'check deletion disk comment "{comment}" against {json.dumps(sectionTitles)}')
+        sectionTitles.append(wtp.parse(sec.title).plain_text().replace(':Kategorie', 'Kategorie').strip())
+    logging.info(f'check deletion disk comment "{comment}" against {json.dumps(sectionTitles, ensure_ascii=False)}')
     return parsedComment[1] in sectionTitles
 
 if __name__ == '__main__':
