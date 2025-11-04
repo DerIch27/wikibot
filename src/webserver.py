@@ -8,8 +8,8 @@ import flask
 
 app = flask.Flask(__name__)
 
-HOST = '212.132.114.61'
-PORT = 80
+HOST = '87.106.41.45'
+PORT = 3000
 
 @app.route('/aktualisiere-wartungsliste-cache')
 def aktualisiere_wartungsliste_cache(): 
