@@ -108,6 +108,7 @@ def getNextDay(datestring: str):
 def templateOk(template: wtp.Template) -> tuple[Literal[True]|str, str|None]:
     ''' Prüft, ob Daten der Vorlagen Internetquelle, Literatur und Cite web ungültig sind oder in der Zukunft liegen '''
     templateName = template.name.strip()
+    if len(templateName) > 0: templateName = templateName[0].upper() + templateName[1:]
     if templateName not in ['Internetquelle', 'Literatur', 'Cite web']:
         return True, None
     todayString = utils.getTodayString()
