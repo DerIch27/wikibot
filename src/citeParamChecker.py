@@ -284,6 +284,9 @@ def checkPage(page: pywikibot.Page, pagetitle: str, allProblems: list[Problem], 
         return
     except pywikibot.exceptions.NoPageError:
         return
+    except pywikibot.exceptions.TimeoutError as e:
+        telegram.handleServerError(e)
+        return checkPage(page, pagetitle, allProblems)
     except pywikibot.exceptions.ServerError as e:
         telegram.handleServerError(e)
         return checkPage(page, pagetitle, allProblems)
