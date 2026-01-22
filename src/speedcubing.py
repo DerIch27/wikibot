@@ -27,6 +27,30 @@ disciplines = {'2x2x2': '2x2x2 Cube',
                'Square1': 'Square-1', 
                'Clock': 'Clock'}
 
+eventNameById = {
+    '333': '3x3x3 Cube',
+    '222': '2x2x2 Cube',
+    '444': '4x4x4 Cube',
+    '555': '5x5x5 Cube',
+    '666': '6x6x6 Cube',
+    '777': '7x7x7 Cube',
+    '333bf': '3x3x3 Blindfolded',
+    '333fm': '3x3x3 Fewest Moves',
+    '333oh': '3x3x3 One-Handed',
+    'clock': 'Clock',
+    'minx': 'Megaminx',
+    'pyram': 'Pyraminx',
+    'skewb': 'Skewb',
+    'sq1': 'Square-1',
+    '444bf': '4x4x4 Blindfolded',
+    '555bf': '5x5x5 Blindfolded',
+    '333mbf': '3x3x3 Multi-Blind',
+    '333ft': '3x3x3 With Feet',
+    'magic': 'Magic',
+    'mmagic': 'Master Magic',
+    '333mbo': '3x3x3 Multi-Blind Old Style'
+}
+
 def differentLinks(name: str):
     links: dict[str, str] = dict()
     if links.get(name) != None:
@@ -114,13 +138,13 @@ def formatTime(centiseconds: int, showCenti: bool):
 def formatValue(data: dict):
     # see https://github.com/thewca/worldcubeassociation.org/blob/main/app/webpacker/lib/wca-live/attempts.js
     value = data['value']
-    event = data['event_name']
-    if 'Multi-Blind' in event:
+    event = data['event_id']
+    if 'mb' in event: # multi blind
         missed = value % 100
         points = 99 - value // 10000000
         seconds = value // 100 % 100000
         return f'{points+missed}/{points+2*missed} {formatTime(seconds*100, showCenti=False)}'
-    elif 'Fewest Moves' in event:
+    elif 'fm' in event: # fewest moves
         if data['type']=='single': return str(value)
         else: return  f'{value/100:.2f}'
     else:
@@ -138,8 +162,8 @@ def scrape():
     assert rows is not None
     data: dict[str, tuple[list[dict[str, str]], list[dict[str, str]]]] = dict()
     for row in rows:
-        event = row.get('event_name')
-        assert event is not None
+        event = row['event_id']
+        event = eventNameById[event]
         if data.get(event) is None: data[event] = ([], [])
         type = row.get('type')
         assert type == 'single' or type == 'average'
