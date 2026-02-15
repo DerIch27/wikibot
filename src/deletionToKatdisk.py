@@ -19,9 +19,10 @@ def extractFromDeletionDisk(content: str) -> tuple[str,str]: # (Kategorien, Rest
         if sec.title != None:
             result += '\n' + sec.level*'=' + ' ' + sec.title + ' ' + sec.level*'=' + '\n\n'
             del sec.title
+        if len(sec) == 0: continue
         split = sec.contents.strip().split('\n')
         newDeletionDiskContents = []
-        if len(split)>0 and re.match('^{{Löschkandidatenseite|erl=.*}}$', split[0]):
+        if len(split)>0 and re.match('^{{(Löschkandidatenseite|Wikipedia:Löschkandidaten/!Seitenkopf)|erl=.*}}$', split[0]):
             newDeletionDiskContents.append(split[0])
             split.pop(0)
         while len(split)>0 and split[0].strip() == '':
@@ -40,6 +41,7 @@ def extractFromDeletionDisk(content: str) -> tuple[str,str]: # (Kategorien, Rest
         .replace('\n<span></span>\n','\n')\
         .replace('\n\n\n', '\n\n')\
         .replace(r"""<span class="wp_boppel noviewer" aria-hidden="true" role="presentation">[[Datei:Symbol support vote.svg|15px|link=]]&nbsp;</span>'''Pro'''""", "{{Pro}}")
+    newContentsString = re.sub(r"\{\{ping\|([^}]+)\}\}", r"@[[Benutzer:\1|\1]]:", newContentsString)
     return newContentsString, parsed.string.strip().replace('\n\n\n', '\n\n')
 
 
