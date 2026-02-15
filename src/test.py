@@ -1,4 +1,5 @@
 from typing import Optional
+import deletionToKatdisk
 import citeParamChecker
 import pywikibot
 import unittest
@@ -39,6 +40,14 @@ class TestSchoolDecorators(unittest.TestCase):
         self.assertTrue(schools.canBeNone(None))
         self.assertFalse(schools.canBeNone(str|int))
         self.assertFalse(schools.canBeNone(float))
+
+
+class TestDeletionDiskExtraction(unittest.TestCase):
+    def test_extract_from_page_without_category(self):
+        for pagecontent in ['{{Wikipedia:Löschkandidaten/!Seitenkopf|erl=}}\n<!-- Hinweis an den letzten Bearbeiter: Wenn alles erledigt ist, hinter "erl=" mit --~~~~ signieren und auch diesen Kommentar löschen. -->\n\n= Benutzerseiten =\n== [[Benutzer:DerIch27]] ==\n\nbla',
+                            '{{Löschkandidatenseite|erl=}}\n<!-- Hinweis an den letzten Bearbeiter: Wenn alles erledigt ist, hinter "erl=" mit --~~~~ signieren. -->\n\n= Benutzerseiten =\n\n= Metaseiten =\n\n= Vorlagen =\n\n= Listen =\n\n= Artikel =\n']:
+            cats, rest = deletionToKatdisk.extractFromDeletionDisk(pagecontent)
+            self.assertEqual(cats, '')
 
 
 if __name__ == '__main__':
