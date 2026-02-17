@@ -1,5 +1,6 @@
 from typing import Literal, Any
 import wikitextparser as wtp
+import rapidfuzz
 import pywikibot
 import telegram
 import logging
@@ -233,6 +234,21 @@ def checkPageContent(titel: str, content: str, todayString: str):
         result = archiveParamsOk(template)
         if True != result: 
             yield Problem(titel, result, str(template), todayString)
+        if checkTemplateTypo(template):
+            yield Problem(titel, 'template typo', str(template), todayString)
+
+
+def checkTemplateTypo(template: wtp.Template):
+    name = template.name.strip()
+    match = rapidfuzz.process.extractOne(name.lower(), ['internetquelle', 'literatur', 'cite web'], score_cutoff=80, scorer=rapidfuzz.fuzz.ratio)
+    if match is None: return False
+    score = match[1]
+    if score == 100: return False
+    foundTemplateTypos: dict[str,float] = utils.loadJson('foundTemplateTypos.json', {})
+    if name not in foundTemplateTypos:
+        foundTemplateTypos[name] = score
+        utils.dumpJson('foundTemplateTypos.json', foundTemplateTypos)
+    return True
 
 
 def checkPage(page: pywikibot.Page, pagetitle: str, allProblems: list[Problem], startAtRevId: int | None = None):

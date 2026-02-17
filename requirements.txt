@@ -13,3 +13,4 @@ types-pytz
 python-dotenv
 pandas
 pandas-stubs
+rapidfuzz

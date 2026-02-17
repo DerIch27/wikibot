@@ -1,3 +1,4 @@
+import wikitextparser as wtp
 from typing import Optional
 import deletionToKatdisk
 import citeParamChecker
@@ -44,10 +45,34 @@ class TestSchoolDecorators(unittest.TestCase):
 
 class TestDeletionDiskExtraction(unittest.TestCase):
     def test_extract_from_page_without_category(self):
-        for pagecontent in ['{{Wikipedia:Löschkandidaten/!Seitenkopf|erl=}}\n<!-- Hinweis an den letzten Bearbeiter: Wenn alles erledigt ist, hinter "erl=" mit --~~~~ signieren und auch diesen Kommentar löschen. -->\n\n= Benutzerseiten =\n== [[Benutzer:DerIch27]] ==\n\nbla',
-                            '{{Löschkandidatenseite|erl=}}\n<!-- Hinweis an den letzten Bearbeiter: Wenn alles erledigt ist, hinter "erl=" mit --~~~~ signieren. -->\n\n= Benutzerseiten =\n\n= Metaseiten =\n\n= Vorlagen =\n\n= Listen =\n\n= Artikel =\n']:
-            cats, rest = deletionToKatdisk.extractFromDeletionDisk(pagecontent)
-            self.assertEqual(cats, '')
+        for i, pagecontent in enumerate(['{{Wikipedia:Löschkandidaten/!Seitenkopf|erl=}}\n<!-- Hinweis an den letzten Bearbeiter: Wenn alles erledigt ist, hinter "erl=" mit --~~~~ signieren und auch diesen Kommentar löschen. -->\n\n= Benutzerseiten =\n== [[Benutzer:DerIch27]] ==\n\nbla',
+                                         '{{Löschkandidatenseite|erl=}}\n<!-- Hinweis an den letzten Bearbeiter: Wenn alles erledigt ist, hinter "erl=" mit --~~~~ signieren. -->\n\n= Benutzerseiten =\n\n= Metaseiten =\n\n= Vorlagen =\n\n= Listen =\n\n= Artikel =\n']):
+            with self.subTest(index=i, pagecontent=pagecontent):
+                cats, rest = deletionToKatdisk.extractFromDeletionDisk(pagecontent)
+                self.assertEqual(cats, '')
+
+
+class TestCiteParamChecker(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.site = pywikibot.Site('de', 'wikipedia')
+    def testInvalidTemplate(self):
+        pagetitle = 'Grammer AG'
+        page = pywikibot.Page(self.site, pagetitle)
+        problems = list(citeParamChecker.checkPage(page, pagetitle, [], 264257961))
+        self.assertEqual(len(problems), 1)
+        problem = problems[0]
+        self.assertEqual(problem.titel, pagetitle)
+        self.assertEqual(problem.problemtyp, 'Parameter abruf/zugriff liegt in der Zukunft.')
+        self.assertEqual(problem.assets, '2026-12-02')
+        self.assertFalse(problem.freshVersion)
+    def testTypoCheck(self):
+        for templatename in ['Internetquelle/', 'Inernentquelle', 'Lateratur']:
+            with self.subTest(templatename=templatename):
+                self.assertTrue(citeParamChecker.checkTemplateTypo(wtp.Template('{{'+templatename+'}}')))
+        for templatename in ['Internetquelle', 'Navigationsleiste deutschsprachiger Literaturnobelpreisträger', 'TUR']:
+            with self.subTest(templatename=templatename):
+                self.assertFalse(citeParamChecker.checkTemplateTypo(wtp.Template('{{'+templatename+'}}')))
 
 
 if __name__ == '__main__':
