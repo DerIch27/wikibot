@@ -28,6 +28,7 @@ def extractFromDeletionDisk(content: str) -> tuple[str,str]: # (Kategorien, Rest
         while len(split)>0 and split[0].strip() == '':
             split.pop(0)
         for comment in ['<!-- Hinweis an den letzten Bearbeiter: Wenn alles erledigt ist, hinter "erl=" mit --~~~~ signieren. -->', 
+                        '<!-- Hinweis an den letzten Bearbeiter: Wenn alles erledigt ist, hinter "erl=" mit --~~~~ signieren und diesen Kommentar löschen. -->',
                         '<!-- Hinweis an den letzten Bearbeiter: Wenn alles erledigt ist, hinter "erl=" mit --~~~~ signieren und auch diesen Kommentar löschen. -->']:
             if comment in split:
                 newDeletionDiskContents.append(comment)

@@ -46,7 +46,8 @@ class TestSchoolDecorators(unittest.TestCase):
 class TestDeletionDiskExtraction(unittest.TestCase):
     def test_extract_from_page_without_category(self):
         for i, pagecontent in enumerate(['{{Wikipedia:Löschkandidaten/!Seitenkopf|erl=}}\n<!-- Hinweis an den letzten Bearbeiter: Wenn alles erledigt ist, hinter "erl=" mit --~~~~ signieren und auch diesen Kommentar löschen. -->\n\n= Benutzerseiten =\n== [[Benutzer:DerIch27]] ==\n\nbla',
-                                         '{{Löschkandidatenseite|erl=}}\n<!-- Hinweis an den letzten Bearbeiter: Wenn alles erledigt ist, hinter "erl=" mit --~~~~ signieren. -->\n\n= Benutzerseiten =\n\n= Metaseiten =\n\n= Vorlagen =\n\n= Listen =\n\n= Artikel =\n']):
+                                         '{{Löschkandidatenseite|erl=}}\n<!-- Hinweis an den letzten Bearbeiter: Wenn alles erledigt ist, hinter "erl=" mit --~~~~ signieren. -->\n\n= Benutzerseiten =\n\n= Metaseiten =\n\n= Vorlagen =\n\n= Listen =\n\n= Artikel =\n',
+                                         '{{Wikipedia:Löschkandidaten/!Seitenkopf|erl=}}\n<!-- Hinweis an den letzten Bearbeiter: Wenn alles erledigt ist, hinter "erl=" mit --~~~~ signieren und diesen Kommentar löschen. -->\n\n= Benutzerseiten =\n\n= Metaseiten =\n\n= Vorlagen =\n\n= Listen =\n\n= Artikel =\n\n== [[Sascha Winter]] ==\n\nEnzyklopädische Relevanz nicht ausreichend dargestellt [[Benutzer:Lutheraner|Lutheraner]] ([[Benutzer Diskussion:Lutheraner|Diskussion]]) 00:45, 19. Feb. 2026 (CET)\n']):
             with self.subTest(index=i, pagecontent=pagecontent):
                 cats, rest = deletionToKatdisk.extractFromDeletionDisk(pagecontent)
                 self.assertEqual(cats, '')
