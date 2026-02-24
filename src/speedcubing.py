@@ -194,14 +194,11 @@ def run():
     return changes
 
 def getFullCompetitionName(id: str):
-    res = requests.get(f'https://www.worldcubeassociation.org/competitions/{id}')
+    res = requests.get(f'https://www.worldcubeassociation.org/api/v0/competitions/{id}')
     assert res.ok
-    soup = bs4.BeautifulSoup(res.text, 'html.parser')
-    body = soup.find(id='competition-data')
-    assert body is not None
-    title = body.find('h3')
-    assert type(title) is bs4.Tag
-    return stripTag(title)
+    content = res.json()
+    assert content is not None
+    return content['name']
 
 if __name__ == '__main__':
     # editWiki(newData, parseEvents, changedDisciplines, 'Benutzer:DerIchBot/Spielwiese/Vorlage:Speedcubing-Rekorddatum', forcedSummary='Tests ...')
