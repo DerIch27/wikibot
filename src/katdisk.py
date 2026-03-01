@@ -82,6 +82,8 @@ def getPageCreator(page: pywikibot.Page) -> str|None:
         for rev in page.revisions(reverse=True, total=1):
             return rev['user']
         return None
+    except pywikibot.exceptions.InvalidTitleError:
+        return None
     except pywikibot.exceptions.NoPageError:
         return None
 
