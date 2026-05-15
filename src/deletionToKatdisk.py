@@ -84,8 +84,8 @@ def moveKatDiskFromDeletionDisk(site: Any, deletionDiskPage: pywikibot.Page, cha
             file.write(katDiskPage.text)
         unresolvedPages: list[str] = utils.loadJson('unresolvedDeletionDiscussions.json', [])
         if force or (change is not None and checkCommentForAnswer(change['comment'], katDiskPage.text) and deletionDiskPage.title() not in unresolvedPages):
-            if utils.savePage(deletionDiskPage, f'Verschiebe Beitrag von {userLink} nach [[{katDiskLink}]]', botflag=True):
-                if not utils.savePage(katDiskPage, f'Verschiebe Beitrag {f'[[Spezial:Diff/{change['revision']['new']}]] ' if change is not None else ''}von {userLink} aus [[{deletionDiskPage.title()}]]', botflag=True):
+            if utils.savePage(deletionDiskPage, f'Verschiebe Beitrag von {userLink} nach [[{katDiskLink}]]', bot=True):
+                if not utils.savePage(katDiskPage, f'Verschiebe Beitrag {f'[[Spezial:Diff/{change['revision']['new']}]] ' if change is not None else ''}von {userLink} aus [[{deletionDiskPage.title()}]]', bot=True):
                     raise Exception('Incomplete move of discussion from deletion disk to kat-disk')
             return True
             telegram.send(f'Verschiebe Eintrag in {deletionDiskPage.title()}{'' if change is None else f' ({telegram.difflink(change)})'}')

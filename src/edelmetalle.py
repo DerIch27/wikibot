@@ -37,7 +37,7 @@ def update(template: str, apiNames: tuple[str, str], displayNames: tuple[str, st
     site.login()
     assert site.logged_in()
     if optOut.isAllowed(page):
-        page.save(botflag=True, minor=False, summary=(f'Bot: Aktualisiere Preise: Schlusskurs vom {datum}'))
+        page.save(bot=True, minor=False, summary=(f'Bot: Aktualisiere Preise: Schlusskurs vom {datum}'))
     site.logout()
     return True
     

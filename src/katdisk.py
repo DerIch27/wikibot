@@ -51,7 +51,7 @@ def notify(site, creator: str, kattitles: list[str], diskTitle: str):
     userdisk = pywikibot.Page(site, f'Benutzer Diskussion:{creator}')
     renderedInfo = infoTemplate(creator, kattitles, diskTitle)
     userdisk.text += renderedInfo
-    if utils.savePage(userdisk, f'Informiere über Diskussion zu {' und '.join([f'[[:{i}]]' for i in kattitles])}.', botflag=False):
+    if utils.savePage(userdisk, f'Informiere über Diskussion zu {' und '.join([f'[[:{i}]]' for i in kattitles])}.', bot=False):
         logging.info(f'Notify {creator} about kat-disk of {' and '.join(kattitles)}')
         return True
     logging.info(f'do not notify {creator} because saving failed')

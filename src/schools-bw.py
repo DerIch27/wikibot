@@ -85,7 +85,7 @@ def addAllDischs():
             template.set_arg('Schulnummer', disch, preserve_spacing=True)
             page.text = parsed
             if optOut.isAllowed(page):
-                page.save(botflag=True, minor=False, summary=(f'Bot: Ergänze Schulnummer (DISCH). Siehe https://schulamt-bw.de/Schuladressdatenbank'))
+                page.save(bot=True, minor=False, summary=(f'Bot: Ergänze Schulnummer (DISCH). Siehe https://schulamt-bw.de/Schuladressdatenbank'))
 
 
 def addWikidataNumberClaim(repo: Any, item: pywikibot.ItemPage, property: str, number: int, url: str, pointInTime: pywikibot.WbTime):

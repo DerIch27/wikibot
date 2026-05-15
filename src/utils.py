@@ -120,11 +120,11 @@ def addToCsv(rawPath: str, row: list, header: list|None=None):
     with io.open(path, 'a', encoding='utf8') as file:
         csv.writer(file).writerow(row)
 
-def savePage(page: pywikibot.Page, summary: str, botflag: bool):
+def savePage(page: pywikibot.Page, summary: str, bot: bool):
     if not optOut.isAllowed(page):
         return False
     try:
-        page.save(summary=f'Bot: {summary}', minor=False, bot=botflag)
+        page.save(summary=f'Bot: {summary}', minor=False, bot=bot)
         return True
     except pywikibot.exceptions.LockedPageError:
         return False

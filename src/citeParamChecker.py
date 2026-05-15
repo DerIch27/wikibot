@@ -360,7 +360,7 @@ def updateWikilist():
     page.text = wikitext
     site.login()
     if optOut.isAllowed(page):
-        page.save(botflag=True, minor=False, summary=(f'Bot: Aktualisiere Wartungsliste: {len(allProblems)} Einträge'))
+        page.save(bot=True, minor=False, summary=(f'Bot: Aktualisiere Wartungsliste: {len(allProblems)} Einträge'))
     site.logout()
 
 
@@ -427,7 +427,7 @@ def sendPlannedNotifications(site):
         completeMessage = utils.formatUserInfo('Möglicherweise fehlerhafte Datumsangabe', user, '\n\n'.join(messageList))
         userdisk = pywikibot.Page(site, f'Benutzer Diskussion:{user}')
         userdisk.text += completeMessage
-        if utils.savePage(userdisk, f'Informiere über potentiell fehlerhafte Datumsangabe', botflag=True):
+        if utils.savePage(userdisk, f'Informiere über potentiell fehlerhafte Datumsangabe', bot=True):
             logging.info(f'Notify {user} about cite param problem')
         else:
             logging.info(f'do not notify {user} because saving failed')

@@ -42,7 +42,7 @@ def save(site, text: str, force=False):
         if not force: return False
     page.text = text
     site.login()
-    page.save(botflag=True, minor=False, summary='Bot: Update')
+    page.save(bot=True, minor=False, summary='Bot: Update')
 
 
 def getTrend():

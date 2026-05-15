@@ -89,7 +89,7 @@ def sendDeletionNotifications(site, date: str=datetime.now().strftime('%Y-%m-%d'
                 continue
             renderedInfo = infoTemplate(author, pagetitle, deletionDiskTitle)
             userdisk.text += renderedInfo
-            if not utils.savePage(userdisk, f'Informiere über Löschantrag zu [[{pagetitle}]].', botflag=False):
+            if not utils.savePage(userdisk, f'Informiere über Löschantrag zu [[{pagetitle}]].', bot=False):
                 logging.info(f'do not notify {author} because saving failed')
                 logs[pagetitle][author]['notified'] = False 
                 continue
