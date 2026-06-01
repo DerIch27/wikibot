@@ -1,6 +1,7 @@
 from pywikibot.comms import eventstreams
 import birthDatesChecker
 import citeParamChecker
+import requests_sse
 import deletionInfo
 import pywikibot
 import telegram
@@ -66,6 +67,9 @@ def monitorRecentChanges():
                 citeParamChecker.checkPagefromRecentChanges(page, change['title'])
         except requests.exceptions.HTTPError as e:
             telegram.handleServerError(e)
+            monitorRecentChanges()
+        except requests_sse.InvalidStatusCodeError as e:
+            telegram.handleServerError()
             monitorRecentChanges()
         except requests.exceptions.ConnectTimeout as e:
             telegram.handleServerError(e)
