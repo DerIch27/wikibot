@@ -69,7 +69,7 @@ def monitorRecentChanges():
             telegram.handleServerError(e)
             monitorRecentChanges()
         except requests_sse.InvalidStatusCodeError as e:
-            telegram.handleServerError()
+            telegram.handleServerError(e)
             monitorRecentChanges()
         except requests.exceptions.ConnectTimeout as e:
             telegram.handleServerError(e)
