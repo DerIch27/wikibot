@@ -2,13 +2,15 @@ import wikitextparser as wtp
 import pywikibot
 import telegram
 import requests
+import logging
 import optOut
 import utils
 import time
 
 def fetch(metall: str):
     print(f'fetch {metall} ...')
-    res = requests.get(f'https://prices.lbma.org.uk/json/{metall}.json')
+    res = requests.get(f'https://prices.lbma.org.uk/json/limited/{metall}.json', headers={'Origin': 'https://www.lbma.org.uk', **utils.headers})
+    if (not res.ok): logging.warn(f'fetching failed with http status {res.status_code}')
     data = res.json()
     return data[-1]['d'], data[-1]['v'][0]
 
@@ -47,4 +49,5 @@ def run():
     return res1 or res2
 
 if __name__ == '__main__':
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - DEBUGGING - %(message)s', level=logging.DEBUG)
     run()

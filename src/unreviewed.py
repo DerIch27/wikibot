@@ -2,7 +2,6 @@ from bs4 import BeautifulSoup
 import pywikibot
 import telegram
 import requests
-import platform
 import logging
 import optOut
 import utils
@@ -12,11 +11,8 @@ import io
 import re
 
 
-headers = {'User-Agent': f'DerIchBot (https://de.wikipedia.org/wiki/Benutzer:DerIchBot) python/{platform.python_version()}'}
-
-
 def scrapeUnreviewedChanges():
-    response = requests.get('https://de.wikipedia.org/wiki/Spezial:Seiten_mit_ungesichteten_Versionen', headers=headers)
+    response = requests.get('https://de.wikipedia.org/wiki/Spezial:Seiten_mit_ungesichteten_Versionen', headers=utils.headers)
     soup = BeautifulSoup(response.text, 'html.parser')
     text = soup.get_text()
     searchResult = re.search('Derzeit sind [0-9\\.]+ Änderungen ausstehend', text)
@@ -26,7 +22,7 @@ def scrapeUnreviewedChanges():
 
 
 def scrapeEditors():
-    response = requests.get('https://de.wikipedia.org/wiki/Spezial:Sichtungsstatistik', headers=headers)
+    response = requests.get('https://de.wikipedia.org/wiki/Spezial:Sichtungsstatistik', headers=utils.headers)
     soup = BeautifulSoup(response.text, 'html.parser')
     searchResult = re.search('Wikipedia hat momentan [0-9\\.]+ Benutzer mit Sichterrecht.', soup.get_text())
     assert searchResult is not None
@@ -88,7 +84,7 @@ def getNumberOfActiveUsers():
         "siprop": "statistics",
         "format": "json"
     }
-    response = requests.get('https://de.wikipedia.org/w/api.php', params=PARAMS, headers=headers)
+    response = requests.get('https://de.wikipedia.org/w/api.php', params=PARAMS, headers=utils.headers)
     data = response.json()
     return data["query"]['statistics']['activeusers']
 
@@ -101,7 +97,7 @@ def getOldest():
         "format": "json",
         "orstart": "2000-01-01T00:00:00Z",
     }
-    response = requests.get('https://de.wikipedia.org/w/api.php', params=PARAMS, headers=headers)
+    response = requests.get('https://de.wikipedia.org/w/api.php', params=PARAMS, headers=utils.headers)
     data = response.json()
     timestamp = data['query']['oldreviewedpages'][0]['pending_since']
     diff = time.time() - time.mktime(time.strptime(timestamp, '%Y-%m-%dT%H:%M:%SZ'))

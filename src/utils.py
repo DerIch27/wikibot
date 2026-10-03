@@ -3,6 +3,7 @@ from typing import Any, TypeVar
 from datetime import datetime
 import wikitextparser as wtp
 import pywikibot
+import platform
 import logging
 import optOut
 import dotenv
@@ -14,6 +15,8 @@ import csv
 import io
 import os
 import re
+
+headers = {'User-Agent': f'DerIchBot (https://de.wikipedia.org/wiki/Benutzer:DerIchBot) python/{platform.python_version()}'}
 
 dotenv.load_dotenv()
 
